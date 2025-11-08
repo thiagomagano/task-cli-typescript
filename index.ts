@@ -18,21 +18,22 @@ function getNextId(tasks: Task[]): number {
   return maxId + 1;
 }
 
-async function lerDB(path: string) {
+async function read(path: string): Promise<Task[]> {
   const file = Bun.file(path);
   if (!(await file.exists())) {
-    file.write(JSON.stringify([]));
+    await file.write(JSON.stringify([]));
+    return [];
   }
 
   try {
-    return await file.json();
+    return await file.json() as Task[];
   } catch (error) {
     console.error("Falha ao ler o arquivo:", error);
     throw error;
   }
 }
 
-async function escreveDB(path: string, data: Task[]): Promise<boolean> {
+async function write(path: string, data: Task[]): Promise<boolean> {
   try {
     const file = Bun.file(path);
     await file.write(JSON.stringify(data));
@@ -57,7 +58,11 @@ async function add(tasks: Task[], description: string) {
     //Colando a task na lista de tasks.
     tasks.push(task);
 
-    await escreveDB(DB_PATH, tasks);
+    const success = await write(DB_PATH, tasks);
+    if (!success) {
+      console.error("Não consegui escrever no banco:");
+      return;
+    }
 
     console.log(
       `Tarefa adicionada com sucesso: ID (${task.id}) ->`,
@@ -77,16 +82,20 @@ async function main() {
     //Tirando os argumentos do bun e do index.ts
     const argumentos = argv.slice(2);
     const command = argumentos[0];
-    const argumento = argumentos[1];
+    const argument = argumentos[1];
 
-    const tasks: Task[] = await lerDB("db.json");
+    const tasks: Task[] = await read(DB_PATH);
 
     switch (command) {
       case "add":
-        if (argumento) {
-          add(tasks, argumento);
+        const description = argument as string;
+        if (!description) {
+          return console.error("Descrição não informada");
+        }
+        if (description.length >= 3) {
+          await add(tasks, description);
         } else {
-          console.error("Argumento inválido");
+          console.error("Descrição inválida, deve ter pelo menos 3 caracteres");
         }
         break;
       case "list":
