@@ -11,8 +11,7 @@ interface Task {
 
 const DB_PATH = "./db.json";
 
-async function getNextId(): Promise<number> {
-  const tasks: Task[] = await lerDB(DB_PATH);
+function getNextId(tasks: Task[]): number {
   if (tasks.length === 0) return 1;
 
   const maxId = Math.max(...tasks.map((item) => item.id || 0));
@@ -44,13 +43,11 @@ async function escreveDB(path: string, data: Task[]): Promise<boolean> {
   }
 }
 
-async function add(description: string) {
+async function add(tasks: Task[], description: string) {
   try {
-    const tasks: Task[] = await lerDB(DB_PATH);
-
     //Criando a task
     const task: Task = {
-      id: await getNextId(),
+      id: getNextId(tasks),
       description,
       status: "todo",
       createdAt: new Date().toISOString(),
@@ -71,8 +68,7 @@ async function add(description: string) {
   }
 }
 
-async function list(): Promise<void> {
-  const tasks: Task[] = await lerDB("db.json");
+async function list(tasks: Task[]): Promise<void> {
   console.table(tasks);
 }
 
@@ -83,17 +79,19 @@ async function main() {
     const command = argumentos[0];
     const argumento = argumentos[1];
 
+    const tasks: Task[] = await lerDB("db.json");
+
     switch (command) {
       case "add":
         if (argumento) {
-          await add(argumento);
+          add(tasks, argumento);
         } else {
           console.error("Argumento inválido");
         }
         break;
       case "list":
         console.log("Listando as tarefa");
-        await list();
+        list(tasks);
         break;
       default:
         console.error(`Comando não encontrado tente --help para ajuda.`);
