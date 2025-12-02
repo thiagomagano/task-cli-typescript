@@ -94,6 +94,17 @@ async function update(tasks: Task[], id: number, description: string): Promise<b
   return true;
 }
 
+async function deleteTask(tasks: Task[], id: number) {
+  //TODO você tem certeza que quer deletar a tarefa: 
+
+  const newTasks = tasks.filter(t => t.id !== id);
+  console.table(newTasks);
+  await write(DB_PATH, newTasks);
+  console.log("Tarefa com id: ", id, "deletada com sucesso")
+
+  return true;
+}
+
 async function main() {
   if (argv.length >= 3) {
     //Tirando os argumentos do bun e do index.ts
@@ -120,13 +131,22 @@ async function main() {
         list(tasks);
         break;
       case "update":
-        console.log("Atualizando tarefas");
         if (argumentos.length >= 3) {
+          console.log("Atualizando tarefas...");
           const taskId = Number(argumentos[1]);
           const newDescription = argumentos[2] as string;
-          update(tasks, taskId, newDescription);
+          await update(tasks, taskId, newDescription);
         } else {
-          console.error("Faltam argumentos para esse comando tente task update <id> <description>");
+          console.error("Faltam argumentos para esse comando tente: task update <id> <description>");
+        }
+        break;
+      case "delete":
+        if (argumentos.length >= 2) {
+          console.log("Deletando tarefa");
+          const taskId = Number(argumentos[1]);
+          await deleteTask(tasks, taskId);
+        } else {
+          console.error("Faltam argumentos para esse comando tente: task delete <id> ");
         }
         break;
       default:
