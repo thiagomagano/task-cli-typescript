@@ -77,32 +77,48 @@ async function list(tasks: Task[]): Promise<void> {
   console.table(tasks);
 }
 
-async function update(tasks: Task[], id: number, description: string): Promise<boolean> {
+async function update(tasks: Task[], id: number, description: string): Promise<void> {
   console.log("Atulizando tarefa de id: ", id);
   console.log("Descrição: ", description);
 
   const taskId = tasks.findIndex(t => t.id === id)
   if (taskId === -1) {
     console.error(`Tarefa com ID ${id} não encontrada.`);
-    return false;
+  } else {
+    tasks[taskId].description = description;
+    await write(DB_PATH, tasks);
+    const newTasks = await read(DB_PATH);
+    list(newTasks);
+    console.log("Tarefa editada com sucesso!")
   }
-  tasks[taskId].description = description;
-  await write(DB_PATH, tasks);
-  const newTasks = await read(DB_PATH);
-  list(newTasks);
-  console.log("Tarefa editada com sucesso!")
-  return true;
 }
 
-async function deleteTask(tasks: Task[], id: number) {
-  //TODO você tem certeza que quer deletar a tarefa: 
+async function deleteTask(tasks: Task[], id: number): Promise<void> {
 
-  const newTasks = tasks.filter(t => t.id !== id);
-  console.table(newTasks);
-  await write(DB_PATH, newTasks);
-  console.log("Tarefa com id: ", id, "deletada com sucesso")
 
-  return true;
+
+  if (tasks.findIndex(t => t.id === id) === -1) {
+    console.log("Id não encontrado, nada foi excluido")
+  } else {
+    //TODO você tem certeza que quer deletar a tarefa: 
+    const task = tasks.find((t) => t.id === id);
+    console.log(
+      `Você tem certeza que deseja excluir a tarefa "${task?.description}"? (y/n)`,
+    );
+
+    for await (const line of console) {
+      if (line.trim().toLowerCase() !== "y") {
+        console.log("Operação cancelada.");
+        return;
+      }
+      break;
+    }
+
+    const newTasks = tasks.filter(t => t.id !== id);
+    await write(DB_PATH, newTasks);
+    console.log("Tarefa com id: ", id, "deletada com sucesso")
+    console.table(newTasks);
+  }
 }
 
 async function main() {
@@ -142,7 +158,7 @@ async function main() {
         break;
       case "delete":
         if (argumentos.length >= 2) {
-          console.log("Deletando tarefa");
+          console.log("Deletando tarefa...");
           const taskId = Number(argumentos[1]);
           await deleteTask(tasks, taskId);
         } else {
