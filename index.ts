@@ -77,6 +77,23 @@ async function list(tasks: Task[]): Promise<void> {
   console.table(tasks);
 }
 
+async function update(tasks: Task[], id: number, description: string): Promise<boolean> {
+  console.log("Atulizando tarefa de id: ", id);
+  console.log("Descrição: ", description);
+
+  const taskId = tasks.findIndex(t => t.id === id)
+  if (taskId === -1) {
+    console.error(`Tarefa com ID ${id} não encontrada.`);
+    return false;
+  }
+  tasks[taskId].description = description;
+  await write(DB_PATH, tasks);
+  const newTasks = await read(DB_PATH);
+  list(newTasks);
+  console.log("Tarefa editada com sucesso!")
+  return true;
+}
+
 async function main() {
   if (argv.length >= 3) {
     //Tirando os argumentos do bun e do index.ts
@@ -101,6 +118,16 @@ async function main() {
       case "list":
         console.log("Listando as tarefa");
         list(tasks);
+        break;
+      case "update":
+        console.log("Atualizando tarefas");
+        if (argumentos.length >= 3) {
+          const taskId = Number(argumentos[1]);
+          const newDescription = argumentos[2] as string;
+          update(tasks, taskId, newDescription);
+        } else {
+          console.error("Faltam argumentos para esse comando tente task update <id> <description>");
+        }
         break;
       default:
         console.error(`Comando não encontrado tente --help para ajuda.`);
