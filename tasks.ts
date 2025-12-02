@@ -96,14 +96,13 @@ async function update(tasks: Task[], id: number, description: string): Promise<v
 async function deleteTask(tasks: Task[], id: number): Promise<void> {
 
 
+  const deletedTask: Task | undefined = tasks.find(t => t.id === id);
 
-  if (tasks.findIndex(t => t.id === id) === -1) {
+  if (!deletedTask) {
     console.log("Id não encontrado, nada foi excluido")
   } else {
-    //TODO você tem certeza que quer deletar a tarefa: 
-    const task = tasks.find((t) => t.id === id);
     console.log(
-      `Você tem certeza que deseja excluir a tarefa "${task?.description}"? (y/n)`,
+      `Você tem certeza que deseja excluir a tarefa "${deletedTask.description}"? (y/n)`,
     );
 
     for await (const line of console) {
@@ -114,9 +113,9 @@ async function deleteTask(tasks: Task[], id: number): Promise<void> {
       break;
     }
 
-    const newTasks = tasks.filter(t => t.id !== id);
+    const newTasks = tasks.filter(t => t.id !== deletedTask.id);
     await write(DB_PATH, newTasks);
-    console.log("Tarefa com id: ", id, "deletada com sucesso")
+    console.log("Tarefa com id: ", deletedTask.id, "deletada com sucesso")
     console.table(newTasks);
   }
 }
