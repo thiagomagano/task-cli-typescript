@@ -54,7 +54,7 @@ async function add(tasks: Task[], description: string) {
       updatedAt: new Date().toISOString(),
     };
 
-    //Colando a task na lista de tasks.
+    //Colocando a task na lista de tasks.
     tasks.push(task);
 
     const success = await write(DB_PATH, tasks);
@@ -123,6 +123,33 @@ async function deleteTask(tasks: Task[], id: number): Promise<void> {
   }
 }
 
+async function changeStatus(
+  tasks: Task[],
+  id: number,
+  status: "in-progress" | "done",
+): Promise<void> {
+  const task = tasks.find((t) => t.id === id);
+  if (!task) {
+    console.error(`Tarefa com ID ${id} não encontrada.`);
+    return;
+  } else {
+    task.status = status;
+    task.updatedAt = new Date().toISOString();
+    await write(DB_PATH, tasks);
+    list(tasks);
+
+    if (status === "in-progress") {
+      console.log(`Tarefa ${task.description} agora está em progresso!`);
+      return;
+    }
+
+    if (status === "done") {
+      console.log(`Tarefa ${task.description} agora está concluída!`);
+      return;
+    }
+  }
+}
+
 async function main() {
   if (argv.length >= 3) {
     //Tirando os argumentos do bun e do index.ts
@@ -168,6 +195,29 @@ async function main() {
         } else {
           console.error(
             "Faltam argumentos para esse comando tente: task delete <id> ",
+          );
+        }
+        break;
+      case "mark-in-progress":
+        if (argumentos.length >= 2) {
+          console.log("Atulizando status para in-progress...");
+          const taskId = Number(argumentos[1]);
+          await changeStatus(tasks, taskId, "in-progress");
+        } else {
+          console.error(
+            "Faltam argumentos para esse comando tente: task mark-in-progress <id> ",
+          );
+        }
+        break;
+
+      case "mark-done":
+        if (argumentos.length >= 2) {
+          console.log("Atulizando status para concluído...");
+          const taskId = Number(argumentos[1]);
+          await changeStatus(tasks, taskId, "done");
+        } else {
+          console.error(
+            "Faltam argumentos para esse comando tente: task mark-in-progress <id> ",
           );
         }
         break;
