@@ -73,8 +73,10 @@ async function add(tasks: Task[], description: string) {
   }
 }
 
-async function list(tasks: Task[]): Promise<void> {
-  console.table(tasks);
+async function list(tasks: Task[], filter?: string | undefined): Promise<void> {
+  filter
+    ? console.table(tasks.filter((t) => t.status === filter))
+    : console.table(tasks);
 }
 
 async function update(
@@ -171,7 +173,24 @@ async function main() {
         }
         break;
       case "list":
-        console.log("Listando as tarefa");
+        console.log("Listando as tarefas");
+
+        if (argumentos.length >= 2) {
+          const filter = argumentos[1];
+          if (
+            filter === "todo" ||
+            filter === "in-progress" ||
+            filter === "done"
+          ) {
+            list(tasks, argumentos[1]);
+          } else {
+            console.log(
+              "Status não conhecido tente: task list <todo|in-progress|done>",
+            );
+          }
+          break;
+        }
+
         list(tasks);
         break;
       case "update":
