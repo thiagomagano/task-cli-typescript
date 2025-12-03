@@ -95,7 +95,6 @@ async function update(
     task.updatedAt = new Date().toISOString();
     await write(DB_PATH, tasks);
     const newTasks = await read(DB_PATH);
-    list(newTasks);
     console.log("Tarefa editada com sucesso!");
   }
 }
@@ -120,8 +119,7 @@ async function deleteTask(tasks: Task[], id: number): Promise<void> {
 
     const newTasks = tasks.filter((t) => t.id !== deletedTask.id);
     await write(DB_PATH, newTasks);
-    console.log("Tarefa com id: ", deletedTask.id, "deletada com sucesso");
-    console.table(newTasks);
+    console.log("Tarefa: ", deletedTask.id, "deletada com sucesso");
   }
 }
 
@@ -164,7 +162,9 @@ async function main() {
       case "add":
         const description = argument as string;
         if (!description) {
-          return console.error("Descrição não informada");
+          return console.error(
+            "Descrição não informada, tente: task-cli add <description>",
+          );
         }
         if (description.length >= 3) {
           await add(tasks, description);
@@ -242,7 +242,7 @@ async function main() {
         console.error(`Comando não encontrado tente --help para ajuda.`);
     }
   } else {
-    console.error("Faltam argumentos, tente index.ts <command> <arg>");
+    console.error("Faltam argumentos, tente: task-cli <command> <args>");
   }
 }
 
