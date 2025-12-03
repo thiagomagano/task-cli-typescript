@@ -101,23 +101,12 @@ task delete 3
 
 ```
 
-### Estrutura do Projeto
-task-cli/
-├── tasks.ts          # Script principal da CLI
-├── db.json          # Banco de dados local (JSON)
-├── package.json     # Dependências e configurações
-├── tsconfig.json    # Configuração do TypeScript
-├── bun.lock         # Lock file do Bun
-└── README.md        # Este arquivo
-
 ### Melhorias planejadas
 
-- [ ] Adicionar suporte a categorias/tags
+- [ ] Implementar testes unitários
+- [ ] Melhorias de UX/UI
 - [ ] Implementar busca por texto nas descrições
 - [ ] Adicionar exportação para CSV/JSON
-- [ ] Criar interface web complementar
-- [ ] Adicionar lembretes por data
-- [ ] Implementar testes unitários
 
 ## 📝 Licença
 
@@ -138,4 +127,4 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 alias task="cd /caminho/para/task-cli && bun tasks.ts"
 ```
 
-Feito com ❤️ para desenvolvedores que amam produtividade no terminal!
+Feito com ❤️ por Thiago Magano.
