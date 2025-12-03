@@ -103,7 +103,7 @@ async function deleteTask(tasks: Task[], id: number): Promise<void> {
   const deletedTask = tasks.find((t) => t.id === id);
 
   if (!deletedTask) {
-    console.log("Id não encontrado, nada foi excluido");
+    console.error("Id não encontrado, nada foi excluido");
   } else {
     console.log(
       `Você tem certeza que deseja excluir a tarefa "${deletedTask.description}"? (y/n)`,
