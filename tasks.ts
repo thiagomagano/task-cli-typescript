@@ -136,17 +136,16 @@ async function changeStatus(
     task.status = status;
     task.updatedAt = new Date().toISOString();
     await write(DB_PATH, tasks);
-    list(tasks);
 
     if (status === "in-progress") {
       console.log(`Tarefa ${task.description} agora está em progresso!`);
-      return;
     }
 
     if (status === "done") {
       console.log(`Tarefa ${task.description} agora está concluída!`);
-      return;
     }
+
+    list(tasks);
   }
 }
 
@@ -209,7 +208,6 @@ async function main() {
           );
         }
         break;
-
       case "mark-done":
         if (argumentos.length >= 2) {
           console.log("Atulizando status para concluído...");
@@ -217,7 +215,7 @@ async function main() {
           await changeStatus(tasks, taskId, "done");
         } else {
           console.error(
-            "Faltam argumentos para esse comando tente: task mark-in-progress <id> ",
+            "Faltam argumentos para esse comando tente: task mark-done <id> ",
           );
         }
         break;
