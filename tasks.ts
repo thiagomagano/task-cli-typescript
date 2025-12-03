@@ -1,4 +1,4 @@
-#!/home/thi/.bun/bin/bun
+#!/usr/bin/env bun
 import { argv } from "bun";
 
 interface Task {
@@ -8,7 +8,6 @@ interface Task {
   createdAt: string;
   updatedAt: string;
 }
-
 const DB_PATH = "./db.json";
 
 function getNextId(tasks: Task[]): number {
@@ -26,7 +25,7 @@ async function read(path: string): Promise<Task[]> {
   }
 
   try {
-    return await file.json() as Task[];
+    return (await file.json()) as Task[];
   } catch (error) {
     console.error("Falha ao ler o arquivo:", error);
     throw error;
@@ -59,6 +58,7 @@ async function add(tasks: Task[], description: string) {
     tasks.push(task);
 
     const success = await write(DB_PATH, tasks);
+
     if (!success) {
       console.error("Não consegui escrever no banco:");
       return;
@@ -77,29 +77,32 @@ async function list(tasks: Task[]): Promise<void> {
   console.table(tasks);
 }
 
-async function update(tasks: Task[], id: number, description: string): Promise<void> {
+async function update(
+  tasks: Task[],
+  id: number,
+  description: string,
+): Promise<void> {
   console.log("Atulizando tarefa de id: ", id);
   console.log("Descrição: ", description);
 
-  const taskId = tasks.findIndex(t => t.id === id)
-  if (taskId === -1) {
+  const task = tasks.find((t) => t.id === id);
+  if (!task) {
     console.error(`Tarefa com ID ${id} não encontrada.`);
   } else {
-    tasks[taskId].description = description;
+    task.description = description;
+    task.updatedAt = new Date().toISOString();
     await write(DB_PATH, tasks);
     const newTasks = await read(DB_PATH);
     list(newTasks);
-    console.log("Tarefa editada com sucesso!")
+    console.log("Tarefa editada com sucesso!");
   }
 }
 
 async function deleteTask(tasks: Task[], id: number): Promise<void> {
-
-
-  const deletedTask: Task | undefined = tasks.find(t => t.id === id);
+  const deletedTask = tasks.find((t) => t.id === id);
 
   if (!deletedTask) {
-    console.log("Id não encontrado, nada foi excluido")
+    console.log("Id não encontrado, nada foi excluido");
   } else {
     console.log(
       `Você tem certeza que deseja excluir a tarefa "${deletedTask.description}"? (y/n)`,
@@ -113,9 +116,9 @@ async function deleteTask(tasks: Task[], id: number): Promise<void> {
       break;
     }
 
-    const newTasks = tasks.filter(t => t.id !== deletedTask.id);
+    const newTasks = tasks.filter((t) => t.id !== deletedTask.id);
     await write(DB_PATH, newTasks);
-    console.log("Tarefa com id: ", deletedTask.id, "deletada com sucesso")
+    console.log("Tarefa com id: ", deletedTask.id, "deletada com sucesso");
     console.table(newTasks);
   }
 }
@@ -152,7 +155,9 @@ async function main() {
           const newDescription = argumentos[2] as string;
           await update(tasks, taskId, newDescription);
         } else {
-          console.error("Faltam argumentos para esse comando tente: task update <id> <description>");
+          console.error(
+            "Faltam argumentos para esse comando tente: task update <id> <description>",
+          );
         }
         break;
       case "delete":
@@ -161,7 +166,9 @@ async function main() {
           const taskId = Number(argumentos[1]);
           await deleteTask(tasks, taskId);
         } else {
-          console.error("Faltam argumentos para esse comando tente: task delete <id> ");
+          console.error(
+            "Faltam argumentos para esse comando tente: task delete <id> ",
+          );
         }
         break;
       default:
